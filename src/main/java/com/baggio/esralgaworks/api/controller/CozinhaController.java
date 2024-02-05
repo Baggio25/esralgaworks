@@ -3,6 +3,7 @@ package com.baggio.esralgaworks.api.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,13 +20,15 @@ public class CozinhaController {
   private CozinhaRepository cozinhaRepository;
 
   @GetMapping
-  public List<Cozinha> listar() {
-    return cozinhaRepository.listar();
+  public ResponseEntity<List<Cozinha>> listar() {
+    List<Cozinha> cozinhas = cozinhaRepository.listar();
+    return ResponseEntity.ok(cozinhas);
   }
 
   @GetMapping(value = "/{id}")
-  public Cozinha buscar(@PathVariable Long id) {
-    return cozinhaRepository.buscar(id);
+  public ResponseEntity<Cozinha> buscar(@PathVariable Long id) {
+    Cozinha cozinha = cozinhaRepository.buscar(id);
+    return ResponseEntity.ok(cozinha);
   }
 
 }
