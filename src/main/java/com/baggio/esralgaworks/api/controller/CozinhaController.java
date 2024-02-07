@@ -18,11 +18,15 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.baggio.esralgaworks.domain.model.Cozinha;
 import com.baggio.esralgaworks.domain.repository.CozinhaRepository;
+import com.baggio.esralgaworks.domain.service.CadastroCozinhaService;
 
 @RestController
 @RequestMapping(value = "/cozinhas")
 public class CozinhaController {
   
+  @Autowired
+  private CadastroCozinhaService cozinhaService;
+
   @Autowired
   private CozinhaRepository cozinhaRepository;
 
@@ -40,7 +44,7 @@ public class CozinhaController {
 
   @PostMapping
   public ResponseEntity<Cozinha> salvar(@RequestBody Cozinha cozinha) {
-    cozinha = cozinhaRepository.salvar(cozinha);
+    cozinha = cozinhaService.salvar(cozinha);
     URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                     .buildAndExpand(cozinha.getId()).toUri();
 
@@ -52,7 +56,7 @@ public class CozinhaController {
     Cozinha cozinhaAtual = cozinhaRepository.buscar(id);
     BeanUtils.copyProperties(cozinha, cozinhaAtual, "id");
 
-    cozinhaAtual = cozinhaRepository.salvar(cozinhaAtual);
+    cozinhaAtual = cozinhaService.salvar(cozinhaAtual);
    
     return ResponseEntity.ok(cozinhaAtual);
   }
