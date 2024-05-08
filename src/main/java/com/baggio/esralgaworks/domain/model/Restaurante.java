@@ -5,9 +5,13 @@ import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +39,16 @@ public class Restaurante {
     @JsonIgnore
     @Embedded
     private Endereco endereco;
+    
+    @JsonIgnore
+    @CreationTimestamp
+    @Column(name = "data_cadastro", columnDefinition = "datetime", nullable = false)
+    private LocalDateTime dataCadastro;
+
+    @JsonIgnore
+    @UpdateTimestamp
+    @Column(name = "data_atualizacao", columnDefinition = "datetime", nullable = false)
+    private LocalDateTime dataAtualizacao;
     
     @JsonIgnore
     @ManyToMany
