@@ -32,6 +32,9 @@ public class Restaurante {
     @JoinColumn(name = "cozinha_id", nullable = false)
     private Cozinha cozinha;
 
+    @Embedded
+    private Endereco endereco;
+    
     @JsonIgnore
     @ManyToMany
     @JoinTable(name = "restaurante_forma_pagamento",
@@ -39,5 +42,6 @@ public class Restaurante {
     		inverseJoinColumns = @JoinColumn(name = "forma_pagamento_id")
     )
     private List<FormaPagamento> formasPagamento = new ArrayList<>();
+    
     
 }
