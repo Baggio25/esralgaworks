@@ -17,28 +17,30 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity
-@Table(name = "produto")
-public class Produto {
+@Table(name = "item_pedido")
+public class ItemPedido {
 
 	@EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    private Long id;
 	
 	@Column(nullable = false)
-	private String nome;
+	private Integer quantidade;
 	
-	@Column(nullable = false)
-	private String descricao;
+	@Column(name = "preco_unitario", nullable = false)
+	private BigDecimal precoUnitario;
 	
-	@Column(nullable = false)
-	private BigDecimal preco;
+	@Column(name = "preco_total", nullable = false)
+	private BigDecimal precoTotal;
 	
-	@Column(nullable = false)
-	private Boolean ativo;
+	private String observacao;
 	
 	@ManyToOne
-	@JoinColumn(name = "restaurante_id", nullable = false)
-	private Restaurante restaurante;
+	@JoinColumn(name = "produto_id", nullable = false)
+	private Produto produto;
 	
+	@ManyToOne
+	@JoinColumn(name = "pedido_id", nullable = false)	
+	private Pedido pedido;
 }
