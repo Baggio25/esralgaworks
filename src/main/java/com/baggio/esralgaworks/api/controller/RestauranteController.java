@@ -2,7 +2,6 @@ package com.baggio.esralgaworks.api.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.baggio.esralgaworks.domain.exception.EntidadeEmUsoException;
 import com.baggio.esralgaworks.domain.exception.EntidadeNaoEncontradaException;
 import com.baggio.esralgaworks.domain.model.Restaurante;
 import com.baggio.esralgaworks.domain.repository.RestauranteRepository;
@@ -37,19 +36,13 @@ public class RestauranteController {
 	@GetMapping
 	public ResponseEntity<List<Restaurante>> listar() {
 		List<Restaurante> restaurantes = restauranteRepository.findAll();
-			
 		return ResponseEntity.ok(restaurantes);
 	}
 
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<Restaurante> buscar(@PathVariable Long id) {
-		Optional<Restaurante> restauranteOpt = restauranteRepository.findById(id);
-
-		if (restauranteOpt.isPresent()) {
-			return ResponseEntity.ok(restauranteOpt.get());
-		}
-
-		return ResponseEntity.notFound().build();
+		Restaurante restaurante = restauranteService.buscarOuFalhar(id);
+		return ResponseEntity.ok(restaurante);
 	}
 
 	@PostMapping
@@ -67,35 +60,17 @@ public class RestauranteController {
 
 	@PutMapping(value = "/{id}")
 	public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Restaurante restaurante) {
-		try {
-			Optional<Restaurante> restauranteOpt = restauranteRepository.findById(id);
+		Restaurante restauranteAtual = restauranteService.buscarOuFalhar(id);
+		BeanUtils.copyProperties(restaurante, restauranteAtual, "id", "formasPagamento", "dataCadastro");
+		restauranteService.salvar(restauranteAtual);
 
-			if (restauranteOpt.isPresent()) {
-				BeanUtils.copyProperties(restaurante, 
-						restauranteOpt.get(), "id", "formasPagamento", "dataCadastro");
-
-				Restaurante restauranteSalva = restauranteService.salvar(restauranteOpt.get());
-				return ResponseEntity.ok(restauranteSalva);
-			}
-
-			return ResponseEntity.notFound().build();
-		} catch (EntidadeNaoEncontradaException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
+		return ResponseEntity.ok(restauranteAtual);
 	}
 
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<?> excluir(@PathVariable Long id) {
-		try {
-			restauranteService.excluir(id);
-			return ResponseEntity.noContent().build();
-
-		} catch (EntidadeEmUsoException e) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-
-		} catch (EntidadeNaoEncontradaException e) {
-			return ResponseEntity.notFound().build();
-		}
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void excluir(@PathVariable Long id) {
+		restauranteService.excluir(id);
 	}
 
 }

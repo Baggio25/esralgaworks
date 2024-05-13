@@ -15,6 +15,10 @@ import com.baggio.esralgaworks.domain.repository.RestauranteRepository;
 @Service
 public class CadastroRestauranteService {
 
+	private static final String MSG_RESTAURANTE_EM_USO = "Estado de código %d não pode ser removido, pois está em uso.";
+	private static final String MSG_RESTAURANTE_NAO_ENCONTRADO = "Estado de código %d não foi encontrado.";
+	
+	
 	@Autowired
 	private RestauranteRepository restauranteRepository;
 
@@ -25,7 +29,7 @@ public class CadastroRestauranteService {
 		Long cozinhaId = restaurante.getCozinha().getId();
 		Cozinha cozinha = cozinhaRepository.findById(cozinhaId)
 				.orElseThrow(() -> new EntidadeNaoEncontradaException(
-						String.format("Não existe cadastro de cozinha com código %d", cozinhaId)));
+						String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, cozinhaId)));
 		
 		restaurante.setCozinha(cozinha);		
 		return restauranteRepository.save(restaurante);
@@ -36,13 +40,19 @@ public class CadastroRestauranteService {
 			restauranteRepository.deleteById(id);
 
 		} catch (EmptyResultDataAccessException e) {
-			throw new EntidadeNaoEncontradaException(String.format("Restaurante de código %d não foi encontrada.", id));
+			throw new EntidadeNaoEncontradaException(String.format(MSG_RESTAURANTE_NAO_ENCONTRADO, id));
 
 		} catch (DataIntegrityViolationException e) {
 			throw new EntidadeEmUsoException(
-					String.format("Restaurante de código %d não pode ser removida, pois está em uso.", id));
+					String.format(MSG_RESTAURANTE_EM_USO, id));
 
 		}
+	}
+
+	public Restaurante buscarOuFalhar(Long id) {
+		return restauranteRepository.findById(id)
+				.orElseThrow(() -> new EntidadeNaoEncontradaException(String
+						.format(MSG_RESTAURANTE_NAO_ENCONTRADO, id)));
 	}
 
 }
