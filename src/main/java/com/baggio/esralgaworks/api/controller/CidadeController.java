@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.baggio.esralgaworks.domain.exception.EntidadeNaoEncontradaException;
+import com.baggio.esralgaworks.domain.exception.NegocioException;
 import com.baggio.esralgaworks.domain.model.Cidade;
 import com.baggio.esralgaworks.domain.repository.CidadeRepository;
 import com.baggio.esralgaworks.domain.service.CadastroCidadeService;
@@ -54,7 +55,7 @@ public class CidadeController {
 
 			return ResponseEntity.created(uri).body(cidade);
 		} catch (EntidadeNaoEncontradaException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			throw new NegocioException(e.getMessage());
 		}
 	}
 
@@ -62,9 +63,14 @@ public class CidadeController {
 	public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Cidade cidade) {
 		Cidade cidadeAtual = cidadeService.buscarOuFalhar(id);
 		BeanUtils.copyProperties(cidade, cidadeAtual, "id");
-		cidadeService.salvar(cidadeAtual);
 
-		return ResponseEntity.ok(cidadeAtual);
+		try {
+			cidadeService.salvar(cidadeAtual);
+			return ResponseEntity.ok(cidadeAtual);
+		} catch (EntidadeNaoEncontradaException e) {
+			throw new NegocioException(e.getMessage());
+		}
+
 	}
 
 	@DeleteMapping(value = "/{id}")
