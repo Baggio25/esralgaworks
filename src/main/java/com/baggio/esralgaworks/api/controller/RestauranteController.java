@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.baggio.esralgaworks.domain.exception.EntidadeNaoEncontradaException;
+import com.baggio.esralgaworks.domain.exception.NegocioException;
 import com.baggio.esralgaworks.domain.model.Restaurante;
 import com.baggio.esralgaworks.domain.repository.RestauranteRepository;
 import com.baggio.esralgaworks.domain.service.CadastroRestauranteService;
@@ -54,7 +55,7 @@ public class RestauranteController {
 
 			return ResponseEntity.created(uri).body(restaurante);
 		} catch (EntidadeNaoEncontradaException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
+			throw new NegocioException(e.getMessage());
 		}
 	}
 
@@ -62,9 +63,13 @@ public class RestauranteController {
 	public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Restaurante restaurante) {
 		Restaurante restauranteAtual = restauranteService.buscarOuFalhar(id);
 		BeanUtils.copyProperties(restaurante, restauranteAtual, "id", "formasPagamento", "dataCadastro");
-		restauranteService.salvar(restauranteAtual);
 
-		return ResponseEntity.ok(restauranteAtual);
+		try {
+			restauranteService.salvar(restauranteAtual);
+			return ResponseEntity.ok(restauranteAtual);
+		} catch (EntidadeNaoEncontradaException e) {
+			throw new NegocioException(e.getMessage());
+		}
 	}
 
 	@DeleteMapping(value = "/{id}")
