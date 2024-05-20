@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.baggio.esralgaworks.domain.exception.EntidadeNaoEncontradaException;
+import com.baggio.esralgaworks.domain.exception.CozinhaNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
 import com.baggio.esralgaworks.domain.model.Restaurante;
 import com.baggio.esralgaworks.domain.repository.RestauranteRepository;
@@ -54,8 +54,8 @@ public class RestauranteController {
 					.toUri();
 
 			return ResponseEntity.created(uri).body(restaurante);
-		} catch (EntidadeNaoEncontradaException e) {
-			throw new NegocioException(e.getMessage());
+		} catch (CozinhaNaoEncontradaException e) {
+			throw new NegocioException(e.getMessage(), e);
 		}
 	}
 
@@ -67,8 +67,8 @@ public class RestauranteController {
 		try {
 			restauranteService.salvar(restauranteAtual);
 			return ResponseEntity.ok(restauranteAtual);
-		} catch (EntidadeNaoEncontradaException e) {
-			throw new NegocioException(e.getMessage());
+		} catch (CozinhaNaoEncontradaException e) {
+			throw new NegocioException(e.getMessage(), e);
 		}
 	}
 
