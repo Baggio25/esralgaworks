@@ -33,16 +33,28 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler{
 	public ResponseEntity<?> handleNegocioException(
 			NegocioException e, WebRequest request) {
 		
-		return handleExceptionInternal(e, e.getMessage(), new HttpHeaders(),
-				HttpStatus.BAD_REQUEST, request);
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		ProblemType problemType = ProblemType.ERRO_NEGOCIO;
+		String detail = e.getMessage();
+		
+		Problem problem = createProblemBuilder(status, problemType, detail).build();
+		
+		return handleExceptionInternal(e, problem, new HttpHeaders(),
+				status, request);
 	}
 	
 	@ExceptionHandler(EntidadeEmUsoException.class)
 	public ResponseEntity<?> handleEntidadeEmUsoException(
 			EntidadeEmUsoException e, WebRequest request){	
 		
-		return handleExceptionInternal(e, e.getMessage(), new HttpHeaders(),
-				HttpStatus.CONFLICT, request);
+		HttpStatus status = HttpStatus.CONFLICT;
+		ProblemType problemType = ProblemType.ENTIDADE_EM_USO;
+		String detail = e.getMessage();
+		
+		Problem problem = createProblemBuilder(status, problemType, detail).build();
+		
+		return handleExceptionInternal(e, problem, new HttpHeaders(),
+				status, request);
 	}
 	
 	@Override
