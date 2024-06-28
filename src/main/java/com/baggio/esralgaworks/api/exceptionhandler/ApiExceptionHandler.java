@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.baggio.esralgaworks.domain.exception.EntidadeEmUsoException;
 import com.baggio.esralgaworks.domain.exception.EntidadeNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
@@ -62,6 +63,11 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
+		Throwable rootCause = e.getCause();
+		if (rootCause instanceof InvalidFormatException) {
+			return handleInvalidFormatException((InvalidFormatException) rootCause, headers, status, request);
+		}
+
 		ProblemType problemType = ProblemType.MENSAGEM_INCROMPREENSIVEL;
 		String detail = "O corpo da requisição está inválido. Verifique o erro de sintaxe";
 
@@ -87,6 +93,21 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		}
 
 		return super.handleExceptionInternal(ex, body, headers, status, request);
+	}
+
+	private ResponseEntity<Object> handleInvalidFormatException(InvalidFormatException e, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
+
+		String path = e.getPath().get(0).getFieldName();
+		
+		ProblemType problemType = ProblemType.MENSAGEM_INCROMPREENSIVEL;
+		String detail = String.format("A propriedade '%s' recebeu o valor '%s', "
+				+ "que é de um tipo inválido. Corrija e informe um valor compatível com o tipo %s.",
+				path, e.getValue(), e.getTargetType().getSimpleName());
+		
+		Problem problem = createProblemBuilder(status, problemType, detail).build();
+		
+		return handleExceptionInternal(e, problem, headers, status, request);
 	}
 
 	private Problem.ProblemBuilder createProblemBuilder(HttpStatus status,

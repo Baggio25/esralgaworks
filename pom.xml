@@ -64,6 +64,12 @@
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 
+		<!-- Commons Lang -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
