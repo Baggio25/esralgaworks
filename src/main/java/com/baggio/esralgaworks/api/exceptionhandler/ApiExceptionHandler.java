@@ -153,7 +153,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 				+ "que é de um tipo inválido. Corrija e informe um valor compatível com o tipo %s.",
 				path, e.getValue(), e.getTargetType().getSimpleName());
 
-		Problem problem = createProblemBuilder(status, problemType, detail).build();
+		Problem problem = createProblemBuilder(status, problemType, detail)
+							.userMessage(MSG_ERRO_GENERICA_USUARIO_FINAL)
+							.build();
 
 		return handleExceptionInternal(e, problem, headers, status, request);
 	}
