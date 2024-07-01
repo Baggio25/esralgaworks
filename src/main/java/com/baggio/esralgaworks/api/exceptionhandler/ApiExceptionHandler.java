@@ -99,14 +99,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			HttpStatus status, WebRequest request) {
 
 		String path = e.getPath().get(0).getFieldName();
-		
+
 		ProblemType problemType = ProblemType.MENSAGEM_INCROMPREENSIVEL;
 		String detail = String.format("A propriedade '%s' recebeu o valor '%s', "
 				+ "que é de um tipo inválido. Corrija e informe um valor compatível com o tipo %s.",
 				path, e.getValue(), e.getTargetType().getSimpleName());
-		
+
 		Problem problem = createProblemBuilder(status, problemType, detail).build();
-		
+
 		return handleExceptionInternal(e, problem, headers, status, request);
 	}
 
