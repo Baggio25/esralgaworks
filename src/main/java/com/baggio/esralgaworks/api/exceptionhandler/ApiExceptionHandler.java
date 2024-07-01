@@ -13,6 +13,7 @@ import com.baggio.esralgaworks.domain.exception.EntidadeEmUsoException;
 import com.baggio.esralgaworks.domain.exception.EntidadeNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.PropertyBindingException;
 
 @ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
@@ -66,7 +67,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		Throwable rootCause = e.getCause();
 		if (rootCause instanceof InvalidFormatException) {
 			return handleInvalidFormatException((InvalidFormatException) rootCause, headers, status, request);
-		}
+		} else if (rootCause instanceof PropertyBindingException) {
+			return handlePropertyBindingException((PropertyBindingException) rootCause, headers, status, request); 
+	}
 
 		ProblemType problemType = ProblemType.MENSAGEM_INCROMPREENSIVEL;
 		String detail = "O corpo da requisição está inválido. Verifique o erro de sintaxe";
@@ -109,6 +112,21 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 		return handleExceptionInternal(e, problem, headers, status, request);
 	}
+
+	private ResponseEntity<Object> handlePropertyBindingException(PropertyBindingException e,
+        HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+    
+		String path = e.getPath().get(0).getFieldName();
+    
+    ProblemType problemType = ProblemType.MENSAGEM_INCROMPREENSIVEL;
+    String detail = String.format("A propriedade '%s' não existe. "
+            + "Corrija ou remova essa propriedade e tente novamente.", path);
+
+    Problem problem = createProblemBuilder(status, problemType, detail).build();
+    
+    return handleExceptionInternal(e, problem, headers, status, request);
+}               
 
 	private Problem.ProblemBuilder createProblemBuilder(HttpStatus status,
 			ProblemType problemType, String detail) {
