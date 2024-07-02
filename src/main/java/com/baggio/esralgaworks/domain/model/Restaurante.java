@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.PositiveOrZero;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -31,6 +32,7 @@ public class Restaurante {
     @Column(nullable = false)
     private String nome;
 
+    @PositiveOrZero(message = "O campo 'taxaFrete' deve ser maior que 0")
     @Column(name = "taxa_frete", nullable = false)
     private BigDecimal taxaFrete;
 
