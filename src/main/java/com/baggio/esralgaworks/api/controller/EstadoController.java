@@ -3,6 +3,8 @@ package com.baggio.esralgaworks.api.controller;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,7 +47,7 @@ public class EstadoController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Estado> salvar(@RequestBody Estado estado) {
+	public ResponseEntity<Estado> salvar(@Valid @RequestBody Estado estado) {
 		estado = estadoService.salvar(estado);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(estado.getId()).toUri();
 
@@ -53,7 +55,7 @@ public class EstadoController {
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<Estado> atualizar(@PathVariable Long id, @RequestBody Estado estado) {
+	public ResponseEntity<Estado> atualizar(@PathVariable Long id, @Valid @RequestBody Estado estado) {
 		Estado estadoAtual = estadoService.buscarOuFalhar(id);
 		BeanUtils.copyProperties(estado, estadoAtual, "id");
 		estadoService.salvar(estadoAtual);

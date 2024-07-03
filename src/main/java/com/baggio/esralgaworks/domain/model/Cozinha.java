@@ -20,7 +20,7 @@ import lombok.EqualsAndHashCode;
 @Table(name = "cozinha")
 public class Cozinha {
 
-    @NotNull(groups = Groups.CozinhaId.class)
+    @NotNull(groups = Groups.CozinhaId.class, message = "O campo 'id' da cozinha é obrigatório")
     @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

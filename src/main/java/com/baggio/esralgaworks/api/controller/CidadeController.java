@@ -3,6 +3,8 @@ package com.baggio.esralgaworks.api.controller;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,7 +50,7 @@ public class CidadeController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> salvar(@RequestBody Cidade cidade) {
+	public ResponseEntity<?> salvar(@Valid @RequestBody Cidade cidade) {
 		try {
 			cidade = cidadeService.salvar(cidade);
 			URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(cidade.getId())
@@ -61,7 +63,7 @@ public class CidadeController {
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<?> atualizar(@PathVariable Long id, @RequestBody Cidade cidade) {
+	public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody Cidade cidade) {
 		try {
 			Cidade cidadeAtual = cidadeService.buscarOuFalhar(id);
 			BeanUtils.copyProperties(cidade, cidadeAtual, "id");
