@@ -15,13 +15,13 @@ import com.baggio.esralgaworks.domain.groups.Groups;
 @Table(name = "estado")
 public class Estado {
 
-	@NotNull(groups = Groups.EstadoId.class, message = "O campo 'id' do estado é obrigatório")
+	@NotNull(groups = Groups.EstadoId.class)
     @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-	@NotBlank(message = "O campo 'nome' é obrigatório")
+	@NotBlank
     @Column(nullable = false)
     private String nome;
 }

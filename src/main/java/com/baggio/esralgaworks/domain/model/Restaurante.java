@@ -48,13 +48,14 @@ public class Restaurante {
     @Column(nullable = false)
     private String nome;
 
-    @PositiveOrZero(message = "O campo 'taxaFrete' deve ser maior que 0")
+    @NotNull
+    @PositiveOrZero
     @Column(name = "taxa_frete", nullable = false)
     private BigDecimal taxaFrete;
 
     @Valid
     @ConvertGroup(from = Default.class, to = Groups.CozinhaId.class)
-    @NotNull(message = "O campo 'cozinha' é obrigatório")
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "cozinha_id", nullable = false)
     private Cozinha cozinha;

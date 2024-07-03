@@ -20,13 +20,13 @@ import lombok.EqualsAndHashCode;
 @Table(name = "cozinha")
 public class Cozinha {
 
-    @NotNull(groups = Groups.CozinhaId.class, message = "O campo 'id' da cozinha é obrigatório")
+    @NotNull(groups = Groups.CozinhaId.class)
     @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "O campo 'nome' é obrigatório")
+    @NotBlank
     @Column(nullable = false)
     private String nome;
 }
