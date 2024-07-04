@@ -1,6 +1,6 @@
 package com.baggio.esralgaworks.domain.model;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class Usuario {
 	@JsonIgnore
     @CreationTimestamp
     @Column(name = "data_cadastro", columnDefinition = "datetime", nullable = false)
-	private LocalDateTime dataCadastro;
+	private OffsetDateTime dataCadastro;
 	
 	@JsonIgnore
 	@ManyToMany

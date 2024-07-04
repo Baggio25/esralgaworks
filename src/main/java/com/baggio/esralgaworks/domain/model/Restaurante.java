@@ -1,7 +1,7 @@
 package com.baggio.esralgaworks.domain.model;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,15 +64,15 @@ public class Restaurante {
     @Embedded
     private Endereco endereco;
     
-    @JsonIgnore
+    //@JsonIgnore
     @CreationTimestamp
     @Column(name = "data_cadastro", columnDefinition = "datetime", nullable = false)
-    private LocalDateTime dataCadastro;
+    private OffsetDateTime dataCadastro;
 
-    @JsonIgnore
+    //@JsonIgnore
     @UpdateTimestamp
     @Column(name = "data_atualizacao", columnDefinition = "datetime", nullable = false)
-    private LocalDateTime dataAtualizacao;
+    private OffsetDateTime dataAtualizacao;
     
     @ManyToMany
     @JoinTable(name = "restaurante_forma_pagamento",
