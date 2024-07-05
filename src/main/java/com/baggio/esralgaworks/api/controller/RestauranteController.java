@@ -23,8 +23,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.baggio.esralgaworks.api.model.dto.CozinhaDTO;
 import com.baggio.esralgaworks.api.model.dto.RestauranteDTO;
+import com.baggio.esralgaworks.api.model.dto.input.RestauranteInputDTO;
 import com.baggio.esralgaworks.domain.exception.CozinhaNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
+import com.baggio.esralgaworks.domain.model.Cozinha;
 import com.baggio.esralgaworks.domain.model.Restaurante;
 import com.baggio.esralgaworks.domain.repository.RestauranteRepository;
 import com.baggio.esralgaworks.domain.service.CadastroRestauranteService;
@@ -52,26 +54,30 @@ public class RestauranteController {
 	}
 
 	@PostMapping
-	public ResponseEntity<RestauranteDTO> salvar(@Valid @RequestBody Restaurante restaurante) {
+	public ResponseEntity<RestauranteDTO> salvar(@Valid @RequestBody RestauranteInputDTO restauranteInputDTO) {
 		try {
-			restaurante = restauranteService.salvar(restaurante);
+			Restaurante restaurante = toDomain(restauranteInputDTO);					
 			URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
 					.path("/{id}").buildAndExpand(restaurante.getId())
 					.toUri();
-
-			return ResponseEntity.created(uri).body(toDTO(restaurante));
+			RestauranteDTO restauranteDTO = toDTO(restauranteService.salvar(restaurante));
+			
+			return ResponseEntity.created(uri).body(restauranteDTO);
 		} catch (CozinhaNaoEncontradaException e) {
 			throw new NegocioException(e.getMessage(), e);
 		}
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<RestauranteDTO> atualizar(@PathVariable Long id, @Valid @RequestBody Restaurante restaurante) {
-		Restaurante restauranteAtual = restauranteService.buscarOuFalhar(id);
-		BeanUtils.copyProperties(restaurante, restauranteAtual, "id", "formasPagamento", "dataCadastro");
+	public ResponseEntity<RestauranteDTO> atualizar(@PathVariable Long id, 
+			@Valid @RequestBody RestauranteInputDTO restauranteInputDTO) {
+		try {		
+			Restaurante restaurante = toDomain(restauranteInputDTO);
+			Restaurante restauranteAtual = restauranteService.buscarOuFalhar(id);
+			BeanUtils.copyProperties(restaurante, restauranteAtual, "id", "formasPagamento", "dataCadastro");
 
-		try {
 			restauranteService.salvar(restauranteAtual);
+			
 			return ResponseEntity.ok(toDTO(restauranteAtual));
 		} catch (CozinhaNaoEncontradaException e) {
 			throw new NegocioException(e.getMessage(), e);
@@ -95,6 +101,18 @@ public class RestauranteController {
 		restauranteDTO.setTaxaFrete(restaurante.getTaxaFrete());
 		restauranteDTO.setCozinhaDTO(cozinhaDTO);
 		return restauranteDTO;
+	}
+	
+	private Restaurante toDomain(RestauranteInputDTO restauranteInputDTO) {
+		Cozinha cozinha = new Cozinha();
+		cozinha.setId(restauranteInputDTO.getCozinha().getId());
+		
+		Restaurante restaurante = new Restaurante();
+		restaurante.setNome(restauranteInputDTO.getNome());
+		restaurante.setTaxaFrete(restauranteInputDTO.getTaxaFrete());
+		restaurante.setCozinha(cozinha);
+		
+		return restaurante;
 	}
 
 	private List<RestauranteDTO> toCollectionDTO(List<Restaurante> restaurantes) {
