@@ -2,6 +2,7 @@ package com.baggio.esralgaworks.api.controller;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.baggio.esralgaworks.api.model.dto.CozinhaDTO;
 import com.baggio.esralgaworks.api.model.dto.RestauranteDTO;
 import com.baggio.esralgaworks.domain.exception.CozinhaNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
@@ -38,39 +40,39 @@ public class RestauranteController {
 	private RestauranteRepository restauranteRepository;
 
 	@GetMapping
-	public ResponseEntity<List<Restaurante>> listar() {
+	public ResponseEntity<List<RestauranteDTO>> listar() {
 		List<Restaurante> restaurantes = restauranteRepository.findAll();
-		return ResponseEntity.ok(restaurantes);
+		return ResponseEntity.ok(toCollectionDTO(restaurantes));
 	}
 
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<RestauranteDTO> buscar(@PathVariable Long id) {
 		Restaurante restaurante = restauranteService.buscarOuFalhar(id);
-		RestauranteDTO dto = null;
-		return ResponseEntity.ok(dto);
+		return ResponseEntity.ok(toDTO(restaurante));
 	}
 
 	@PostMapping
-	public ResponseEntity<?> salvar(@Valid @RequestBody Restaurante restaurante) {
+	public ResponseEntity<RestauranteDTO> salvar(@Valid @RequestBody Restaurante restaurante) {
 		try {
 			restaurante = restauranteService.salvar(restaurante);
-			URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(restaurante.getId())
+			URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+					.path("/{id}").buildAndExpand(restaurante.getId())
 					.toUri();
 
-			return ResponseEntity.created(uri).body(restaurante);
+			return ResponseEntity.created(uri).body(toDTO(restaurante));
 		} catch (CozinhaNaoEncontradaException e) {
 			throw new NegocioException(e.getMessage(), e);
 		}
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody Restaurante restaurante) {
+	public ResponseEntity<RestauranteDTO> atualizar(@PathVariable Long id, @Valid @RequestBody Restaurante restaurante) {
 		Restaurante restauranteAtual = restauranteService.buscarOuFalhar(id);
 		BeanUtils.copyProperties(restaurante, restauranteAtual, "id", "formasPagamento", "dataCadastro");
 
 		try {
 			restauranteService.salvar(restauranteAtual);
-			return ResponseEntity.ok(restauranteAtual);
+			return ResponseEntity.ok(toDTO(restauranteAtual));
 		} catch (CozinhaNaoEncontradaException e) {
 			throw new NegocioException(e.getMessage(), e);
 		}
@@ -81,5 +83,23 @@ public class RestauranteController {
 	public void excluir(@PathVariable Long id) {
 		restauranteService.excluir(id);
 	}
+	
+	private RestauranteDTO toDTO(Restaurante restaurante) {
+		CozinhaDTO cozinhaDTO = new CozinhaDTO();
+		cozinhaDTO.setId(restaurante.getCozinha().getId());
+		cozinhaDTO.setNome(restaurante.getCozinha().getNome());
+		
+		RestauranteDTO restauranteDTO = new RestauranteDTO();
+		restauranteDTO.setId(restaurante.getId());
+		restauranteDTO.setNome(restaurante.getNome());
+		restauranteDTO.setTaxaFrete(restaurante.getTaxaFrete());
+		restauranteDTO.setCozinhaDTO(cozinhaDTO);
+		return restauranteDTO;
+	}
 
+	private List<RestauranteDTO> toCollectionDTO(List<Restaurante> restaurantes) {
+		return restaurantes.stream()
+				.map(restaurante -> toDTO(restaurante))
+				.collect(Collectors.toList());
+	}
 }
