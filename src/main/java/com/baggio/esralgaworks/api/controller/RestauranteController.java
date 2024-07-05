@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.baggio.esralgaworks.api.model.dto.RestauranteDTO;
 import com.baggio.esralgaworks.domain.exception.CozinhaNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
 import com.baggio.esralgaworks.domain.model.Restaurante;
@@ -43,9 +44,10 @@ public class RestauranteController {
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<Restaurante> buscar(@PathVariable Long id) {
+	public ResponseEntity<RestauranteDTO> buscar(@PathVariable Long id) {
 		Restaurante restaurante = restauranteService.buscarOuFalhar(id);
-		return ResponseEntity.ok(restaurante);
+		RestauranteDTO dto = null;
+		return ResponseEntity.ok(dto);
 	}
 
 	@PostMapping
