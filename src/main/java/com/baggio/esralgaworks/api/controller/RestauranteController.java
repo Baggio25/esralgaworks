@@ -21,11 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.baggio.esralgaworks.api.model.assembler.RestauranteDTOAssembler;
+import com.baggio.esralgaworks.api.model.disassembler.RestauranteInputDTODisassembler;
 import com.baggio.esralgaworks.api.model.dto.RestauranteDTO;
 import com.baggio.esralgaworks.api.model.dto.input.RestauranteInputDTO;
 import com.baggio.esralgaworks.domain.exception.CozinhaNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
-import com.baggio.esralgaworks.domain.model.Cozinha;
 import com.baggio.esralgaworks.domain.model.Restaurante;
 import com.baggio.esralgaworks.domain.repository.RestauranteRepository;
 import com.baggio.esralgaworks.domain.service.CadastroRestauranteService;
@@ -42,6 +42,9 @@ public class RestauranteController {
 	
 	@Autowired
 	private RestauranteDTOAssembler restauranteDTOAssembler;
+	
+	@Autowired
+	private RestauranteInputDTODisassembler restauranteInputDTODisassembler;
 
 	@GetMapping
 	public ResponseEntity<List<RestauranteDTO>> listar() {
@@ -58,7 +61,7 @@ public class RestauranteController {
 	@PostMapping
 	public ResponseEntity<RestauranteDTO> salvar(@Valid @RequestBody RestauranteInputDTO restauranteInputDTO) {
 		try {
-			Restaurante restaurante = toDomain(restauranteInputDTO);					
+			Restaurante restaurante = restauranteInputDTODisassembler.toDomain(restauranteInputDTO);					
 			URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
 					.path("/{id}").buildAndExpand(restaurante.getId())
 					.toUri();
@@ -74,7 +77,7 @@ public class RestauranteController {
 	public ResponseEntity<RestauranteDTO> atualizar(@PathVariable Long id, 
 			@Valid @RequestBody RestauranteInputDTO restauranteInputDTO) {
 		try {		
-			Restaurante restaurante = toDomain(restauranteInputDTO);
+			Restaurante restaurante = restauranteInputDTODisassembler.toDomain(restauranteInputDTO);
 			Restaurante restauranteAtual = restauranteService.buscarOuFalhar(id);
 			BeanUtils.copyProperties(restaurante, restauranteAtual, "id", "formasPagamento", "dataCadastro");
 
@@ -92,15 +95,4 @@ public class RestauranteController {
 		restauranteService.excluir(id);
 	}
 
-	public Restaurante toDomain(RestauranteInputDTO restauranteInputDTO) {
-		Cozinha cozinha = new Cozinha();
-		cozinha.setId(restauranteInputDTO.getCozinha().getId());
-		
-		Restaurante restaurante = new Restaurante();
-		restaurante.setNome(restauranteInputDTO.getNome());
-		restaurante.setTaxaFrete(restauranteInputDTO.getTaxaFrete());
-		restaurante.setCozinha(cozinha);
-		
-		return restaurante;
-	}
 }
