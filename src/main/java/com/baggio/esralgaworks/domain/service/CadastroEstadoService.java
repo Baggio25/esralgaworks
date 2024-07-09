@@ -24,7 +24,6 @@ public class CadastroEstadoService {
 		return estadoRepository.save(estado);
 	}
 
-	@Transactional
 	public void excluir(Long id) {
 		try {
 			estadoRepository.deleteById(id);

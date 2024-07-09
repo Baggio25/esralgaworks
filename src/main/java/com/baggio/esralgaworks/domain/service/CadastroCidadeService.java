@@ -32,7 +32,6 @@ public class CadastroCidadeService {
 		return cidadeRepository.save(cidade);
 	}
 
-	@Transactional
 	public void excluir(Long id) {
 		try {
 			cidadeRepository.deleteById(id);
