@@ -32,9 +32,11 @@ public class CadastroCidadeService {
 		return cidadeRepository.save(cidade);
 	}
 
+	@Transactional
 	public void excluir(Long id) {
 		try {
 			cidadeRepository.deleteById(id);
+			cidadeRepository.flush();
 
 		} catch (EmptyResultDataAccessException e) {
 			throw new CidadeNaoEncontradaException(id);

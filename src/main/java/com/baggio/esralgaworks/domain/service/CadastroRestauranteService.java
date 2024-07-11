@@ -36,10 +36,11 @@ public class CadastroRestauranteService {
 		return restauranteRepository.save(restaurante);
 	}
 
+	@Transactional
 	public void excluir(Long id) {
 		try {
 			restauranteRepository.deleteById(id);
-
+			restauranteRepository.flush();
 		} catch (EmptyResultDataAccessException e) {
 			throw new RestauranteNaoEncontradoException(id);
 
