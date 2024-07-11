@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +19,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.baggio.esralgaworks.api.model.assembler.CozinhaDTOAssembler;
+import com.baggio.esralgaworks.api.model.disassembler.CozinhaInputDTODisassembler;
+import com.baggio.esralgaworks.api.model.dto.CozinhaDTO;
+import com.baggio.esralgaworks.api.model.dto.input.CozinhaInputDTO;
 import com.baggio.esralgaworks.domain.model.Cozinha;
 import com.baggio.esralgaworks.domain.repository.CozinhaRepository;
 import com.baggio.esralgaworks.domain.service.CadastroCozinhaService;
@@ -33,35 +36,43 @@ public class CozinhaController {
 
 	@Autowired
 	private CozinhaRepository cozinhaRepository;
+	
+	@Autowired
+	private CozinhaDTOAssembler cozinhaDTOAssembler;
+	
+	@Autowired
+	private CozinhaInputDTODisassembler cozinhaInputDTODisassembler;
 
 	@GetMapping
-	public ResponseEntity<List<Cozinha>> listar() {
-		List<Cozinha> cozinhas = cozinhaRepository.findAll();
-		return ResponseEntity.ok(cozinhas);
+	public ResponseEntity<List<CozinhaDTO>> listar() {
+		List<Cozinha> cozinhas = cozinhaRepository.findAll();		
+		return ResponseEntity.ok(cozinhaDTOAssembler.toCollectionDTO(cozinhas));
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<Cozinha> buscar(@PathVariable Long id) {
+	public ResponseEntity<CozinhaDTO> buscar(@PathVariable Long id) {
 		Cozinha cozinha = cozinhaService.buscarOuFalhar(id);
-		return ResponseEntity.ok(cozinha);
+		return ResponseEntity.ok(cozinhaDTOAssembler.toDTO(cozinha));
 	}
 
 	@PostMapping
-	public ResponseEntity<Cozinha> salvar(@Valid @RequestBody Cozinha cozinha) {
+	public ResponseEntity<CozinhaDTO> salvar(@Valid @RequestBody CozinhaInputDTO cozinhaInputDTO) {
+		Cozinha cozinha = cozinhaInputDTODisassembler.toDomain(cozinhaInputDTO);
 		cozinha = cozinhaService.salvar(cozinha);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
 					.path("/{id}").buildAndExpand(cozinha.getId()).toUri();
 
-		return ResponseEntity.created(uri).body(cozinha);
+		return ResponseEntity.created(uri).body(cozinhaDTOAssembler.toDTO(cozinha));
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<Cozinha> atualizar(@PathVariable Long id, @Valid @RequestBody Cozinha cozinha) {
+	public ResponseEntity<CozinhaDTO> atualizar(@PathVariable Long id, 
+			@Valid @RequestBody CozinhaInputDTO cozinhaInputDTO) {
 		Cozinha cozinhaAtual = cozinhaService.buscarOuFalhar(id);
-		BeanUtils.copyProperties(cozinha, cozinhaAtual, "id");
-		cozinhaService.salvar(cozinhaAtual);
-
-		return ResponseEntity.ok(cozinhaAtual);
+		cozinhaInputDTODisassembler.copyToDomainObject(cozinhaInputDTO, cozinhaAtual);
+		cozinhaAtual = cozinhaService.salvar(cozinhaAtual);
+		
+		return ResponseEntity.ok(cozinhaDTOAssembler.toDTO(cozinhaAtual));
 	}
 
 	@DeleteMapping(value = "/{id}")

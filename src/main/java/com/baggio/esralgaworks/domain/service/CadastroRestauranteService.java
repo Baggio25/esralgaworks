@@ -17,7 +17,8 @@ import com.baggio.esralgaworks.domain.repository.RestauranteRepository;
 @Service
 public class CadastroRestauranteService {
 
-	private static final String MSG_RESTAURANTE_EM_USO = "Estado de código %d não pode ser removido, pois está em uso.";
+	private static final String MSG_RESTAURANTE_EM_USO = "Restaurante de código %d não pode ser removido, "
+			+ "pois está em uso.";
 
 	@Autowired
 	private RestauranteRepository restauranteRepository;

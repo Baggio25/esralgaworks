@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +19,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.baggio.esralgaworks.api.model.assembler.CidadeDTOAssembler;
+import com.baggio.esralgaworks.api.model.disassembler.CidadeInputDTODisassembler;
+import com.baggio.esralgaworks.api.model.dto.CidadeDTO;
+import com.baggio.esralgaworks.api.model.dto.input.CidadeInputDTO;
 import com.baggio.esralgaworks.domain.exception.EntidadeNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.EstadoNaoEncontradoException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
@@ -36,44 +39,52 @@ public class CidadeController {
 
 	@Autowired
 	private CidadeRepository cidadeRepository;
+	
+	@Autowired
+	private CidadeDTOAssembler cidadeDTOAssembler;
+	
+	@Autowired
+	private CidadeInputDTODisassembler cidadeInputDTODisassembler;
 
 	@GetMapping
-	public ResponseEntity<List<Cidade>> listar() {
+	public ResponseEntity<List<CidadeDTO>> listar() {
 		List<Cidade> cidades = cidadeRepository.findAll();
-		return ResponseEntity.ok(cidades);
+		return ResponseEntity.ok(cidadeDTOAssembler.toCollectionDTO(cidades));
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<Cidade> buscar(@PathVariable Long id) {
+	public ResponseEntity<CidadeDTO> buscar(@PathVariable Long id) {
 		Cidade cidade = cidadeService.buscarOuFalhar(id);
-		return ResponseEntity.ok(cidade);
+		return ResponseEntity.ok(cidadeDTOAssembler.toDTO(cidade));
 	}
 
 	@PostMapping
-	public ResponseEntity<?> salvar(@Valid @RequestBody Cidade cidade) {
+	public ResponseEntity<CidadeDTO> salvar(@Valid @RequestBody CidadeInputDTO cidadeInputDTO) {
 		try {
+			Cidade cidade = cidadeInputDTODisassembler.toDomain(cidadeInputDTO);
 			cidade = cidadeService.salvar(cidade);
-			URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(cidade.getId())
+			URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+					.path("/{id}").buildAndExpand(cidade.getId())
 					.toUri();
 
-			return ResponseEntity.created(uri).body(cidade);
+			return ResponseEntity.created(uri).body(cidadeDTOAssembler.toDTO(cidade));
 		} catch (EntidadeNaoEncontradaException e) {
 			throw new NegocioException(e.getMessage(), e);
 		}
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<?> atualizar(@PathVariable Long id, @Valid @RequestBody Cidade cidade) {
+	public ResponseEntity<CidadeDTO> atualizar(@PathVariable Long id, 
+			@Valid @RequestBody CidadeInputDTO cidadeInputDTO) {
 		try {
 			Cidade cidadeAtual = cidadeService.buscarOuFalhar(id);
-			BeanUtils.copyProperties(cidade, cidadeAtual, "id");
-
-			cidadeService.salvar(cidadeAtual);
-			return ResponseEntity.ok(cidadeAtual);
+			cidadeInputDTODisassembler.copyToDomainObject(cidadeInputDTO, cidadeAtual);
+			cidadeAtual = cidadeService.salvar(cidadeAtual);
+			
+			return ResponseEntity.ok(cidadeDTOAssembler.toDTO(cidadeAtual));
 		} catch (EstadoNaoEncontradoException e) {
 			throw new NegocioException(e.getMessage(), e);
 		}
-
 	}
 
 	@DeleteMapping(value = "/{id}")

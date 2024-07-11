@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +19,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.baggio.esralgaworks.api.model.assembler.EstadoDTOAssembler;
+import com.baggio.esralgaworks.api.model.disassembler.EstadoInputDTODisassembler;
+import com.baggio.esralgaworks.api.model.dto.EstadoDTO;
+import com.baggio.esralgaworks.api.model.dto.input.EstadoInputDTO;
 import com.baggio.esralgaworks.domain.model.Estado;
 import com.baggio.esralgaworks.domain.repository.EstadoRepository;
 import com.baggio.esralgaworks.domain.service.CadastroEstadoService;
@@ -33,34 +36,45 @@ public class EstadoController {
 
 	@Autowired
 	private EstadoRepository estadoRepository;
+	
+	@Autowired
+	private EstadoDTOAssembler estadoDTOAssembler;
+	
+	@Autowired
+	private EstadoInputDTODisassembler estadoInputDTODisassembler;
 
 	@GetMapping
-	public ResponseEntity<List<Estado>> listar() {
+	public ResponseEntity<List<EstadoDTO>> listar() {
 		List<Estado> estados = estadoRepository.findAll();
-		return ResponseEntity.ok(estados);
+		return ResponseEntity.ok(estadoDTOAssembler.toCollectionDTO(estados));
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<Estado> buscar(@PathVariable Long id) {
+	public ResponseEntity<EstadoDTO> buscar(@PathVariable Long id) {
 		Estado estado = estadoService.buscarOuFalhar(id);
-		return ResponseEntity.ok(estado);
+		return ResponseEntity.ok(estadoDTOAssembler.toDTO(estado));
 	}
 
 	@PostMapping
-	public ResponseEntity<Estado> salvar(@Valid @RequestBody Estado estado) {
+	public ResponseEntity<EstadoDTO> salvar(@Valid @RequestBody EstadoInputDTO estadoInputDTO) {
+		Estado estado = estadoInputDTODisassembler.toDomain(estadoInputDTO);
 		estado = estadoService.salvar(estado);
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(estado.getId()).toUri();
+		
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(estado.getId()).toUri();
 
-		return ResponseEntity.created(uri).body(estado);
+		return ResponseEntity.created(uri).body(estadoDTOAssembler.toDTO(estado));
 	}
 
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<Estado> atualizar(@PathVariable Long id, @Valid @RequestBody Estado estado) {
+	public ResponseEntity<EstadoDTO> atualizar(@PathVariable Long id, 
+			@Valid @RequestBody EstadoInputDTO estadoInputDTO) {
 		Estado estadoAtual = estadoService.buscarOuFalhar(id);
-		BeanUtils.copyProperties(estado, estadoAtual, "id");
-		estadoService.salvar(estadoAtual);
+		estadoInputDTODisassembler.copyToDomainObject(estadoInputDTO, estadoAtual);
+		estadoAtual = estadoService.salvar(estadoAtual);
 
-		return ResponseEntity.ok(estadoAtual);
+		return ResponseEntity.ok(estadoDTOAssembler.toDTO(estadoAtual));
 	}
 
 	@DeleteMapping(value = "/{id}")
