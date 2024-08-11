@@ -26,6 +26,7 @@ import com.baggio.esralgaworks.api.model.disassembler.RestauranteInputDTODisasse
 import com.baggio.esralgaworks.api.model.dto.RestauranteDTO;
 import com.baggio.esralgaworks.api.model.dto.RestauranteListDTO;
 import com.baggio.esralgaworks.api.model.dto.input.RestauranteInputDTO;
+import com.baggio.esralgaworks.domain.exception.CidadeNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.CozinhaNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
 import com.baggio.esralgaworks.domain.model.Restaurante;
@@ -70,10 +71,12 @@ public class RestauranteController {
 			URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
 					.path("/{id}").buildAndExpand(restaurante.getId())
 					.toUri();
-			RestauranteDTO restauranteDTO = restauranteDTOAssembler.toDTO(restauranteService.salvar(restaurante));
+			
+			RestauranteDTO restauranteDTO = 
+					restauranteDTOAssembler.toDTO(restauranteService.salvar(restaurante));
 			
 			return ResponseEntity.created(uri).body(restauranteDTO);
-		} catch (CozinhaNaoEncontradaException e) {
+		} catch (CozinhaNaoEncontradaException | CidadeNaoEncontradaException e) {
 			throw new NegocioException(e.getMessage(), e);
 		}
 	}
@@ -89,7 +92,7 @@ public class RestauranteController {
 			restauranteService.salvar(restauranteAtual);
 			
 			return ResponseEntity.ok(restauranteDTOAssembler.toDTO(restauranteAtual));
-		} catch (CozinhaNaoEncontradaException e) {
+		} catch (CozinhaNaoEncontradaException | CidadeNaoEncontradaException e) {
 			throw new NegocioException(e.getMessage(), e);
 		}
 	}
