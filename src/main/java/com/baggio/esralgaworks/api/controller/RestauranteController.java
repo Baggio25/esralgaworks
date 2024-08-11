@@ -21,8 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.baggio.esralgaworks.api.model.assembler.RestauranteDTOAssembler;
+import com.baggio.esralgaworks.api.model.assembler.RestauranteListDTOAssembler;
 import com.baggio.esralgaworks.api.model.disassembler.RestauranteInputDTODisassembler;
 import com.baggio.esralgaworks.api.model.dto.RestauranteDTO;
+import com.baggio.esralgaworks.api.model.dto.RestauranteListDTO;
 import com.baggio.esralgaworks.api.model.dto.input.RestauranteInputDTO;
 import com.baggio.esralgaworks.domain.exception.CozinhaNaoEncontradaException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
@@ -44,12 +46,15 @@ public class RestauranteController {
 	private RestauranteDTOAssembler restauranteDTOAssembler;
 	
 	@Autowired
+	private RestauranteListDTOAssembler restauranteListDTOAssembler;
+		
+	@Autowired
 	private RestauranteInputDTODisassembler restauranteInputDTODisassembler;
 
 	@GetMapping
-	public ResponseEntity<List<RestauranteDTO>> listar() {
+	public ResponseEntity<List<RestauranteListDTO>> listar() {
 		List<Restaurante> restaurantes = restauranteRepository.findAll();
-		return ResponseEntity.ok(restauranteDTOAssembler.toCollectionDTO(restaurantes));
+		return ResponseEntity.ok(restauranteListDTOAssembler.toCollectionDTO(restaurantes));
 	}
 
 	@GetMapping(value = "/{id}")
