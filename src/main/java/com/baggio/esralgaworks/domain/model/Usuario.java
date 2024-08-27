@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -28,11 +29,15 @@ import lombok.EqualsAndHashCode;
 public class Usuario {
 
 	@EqualsAndHashCode.Include
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	
 	@Column(nullable = false)
+	private String nome;
+	
+	@Column(nullable = false)
+	@Email
 	private String email;
 	
 	@JsonIgnore
@@ -52,4 +57,13 @@ public class Usuario {
 	)
 	private List<Grupo> grupos = new ArrayList<>();    
 	
+	public boolean senhaCoincideCom(String senha) {
+		return getSenha().equals(senha);
+	}
+	
+	public boolean senhaNaoCoincideCom(String senha) {
+		return !senhaCoincideCom(senha);
+	}
+
+
 }
