@@ -1,12 +1,13 @@
 package com.baggio.esralgaworks.domain.service;
 
+import java.util.Optional;
+
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.baggio.esralgaworks.domain.exception.EntidadeEmUsoException;
 import com.baggio.esralgaworks.domain.exception.NegocioException;
 import com.baggio.esralgaworks.domain.exception.UsuarioNaoEncontradoException;
 import com.baggio.esralgaworks.domain.model.Usuario;
@@ -15,14 +16,24 @@ import com.baggio.esralgaworks.domain.repository.UsuarioRepository;
 @Service
 public class CadastroUsuarioService {
 
-	private static final String MSG_ESTADO_EM_USO = "Usuario de código %d não pode ser removido, pois está em uso.";
-	
 	@Autowired
-	private UsuarioRepository UsuarioRepository;
+	private UsuarioRepository usuarioRepository;
+
+	@Autowired
+	private EntityManager entityManager;
 
 	@Transactional
-	public Usuario salvar(Usuario Usuario) {
-		return UsuarioRepository.save(Usuario);
+	public Usuario salvar(Usuario usuario) {
+		entityManager.detach(usuario);
+
+		Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(usuario.getEmail());
+
+		if(usuarioExistente.isPresent() && !usuarioExistente.get().equals(usuario)) {
+			throw new NegocioException(
+				String.format("Já existe um usuário cadastrado com o e-mail: %s", usuario.getEmail()));
+		}
+
+		return usuarioRepository.save(usuario);
 	}
 
 	public void alterarSenha(Long usuarioId, String senhaAtual, String novaSenha) {
@@ -36,7 +47,7 @@ public class CadastroUsuarioService {
 	}
 
 	public Usuario buscarOuFalhar(Long id) {
-		return UsuarioRepository.findById(id)
+		return usuarioRepository.findById(id)
 				.orElseThrow(() -> new UsuarioNaoEncontradoException(id));
 	}
 
