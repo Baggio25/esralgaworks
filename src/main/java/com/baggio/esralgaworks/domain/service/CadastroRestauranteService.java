@@ -11,6 +11,7 @@ import com.baggio.esralgaworks.domain.exception.EntidadeEmUsoException;
 import com.baggio.esralgaworks.domain.exception.RestauranteNaoEncontradoException;
 import com.baggio.esralgaworks.domain.model.Cidade;
 import com.baggio.esralgaworks.domain.model.Cozinha;
+import com.baggio.esralgaworks.domain.model.FormaPagamento;
 import com.baggio.esralgaworks.domain.model.Restaurante;
 import com.baggio.esralgaworks.domain.repository.CozinhaRepository;
 import com.baggio.esralgaworks.domain.repository.RestauranteRepository;
@@ -29,6 +30,9 @@ public class CadastroRestauranteService {
 	
 	@Autowired
 	private CadastroCidadeService cidadeService;
+
+	@Autowired
+	private CadastroFormaPagamentoService formaPagamentoService;
 
 	@Transactional
 	public Restaurante salvar(Restaurante restaurante) {
@@ -69,9 +73,26 @@ public class CadastroRestauranteService {
 		restauranteAtual.inativar();
 	}
 
+	@Transactional
+	public void associarFormaPagamento(Long restauranteId, Long formaPagamentoId) {
+		Restaurante restaurante = buscarOuFalhar(restauranteId);
+		FormaPagamento formaPagamento = formaPagamentoService.buscarOuFalhar(formaPagamentoId);
+
+		restaurante.associarFormaPagamento(formaPagamento);
+	}
+	
+	@Transactional
+	public void desassociarFormaPagamento(Long restauranteId, Long formaPagamentoId) {
+		Restaurante restaurante = buscarOuFalhar(restauranteId);
+		FormaPagamento formaPagamento = formaPagamentoService.buscarOuFalhar(formaPagamentoId);
+
+		restaurante.desassociarFormaPagamento(formaPagamento);
+	}
+
 	public Restaurante buscarOuFalhar(Long id) {
 		return restauranteRepository.findById(id).orElseThrow(() -> new RestauranteNaoEncontradoException(id));
 	}
+
 
 
 }
