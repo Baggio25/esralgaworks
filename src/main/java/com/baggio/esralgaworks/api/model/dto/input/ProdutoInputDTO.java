@@ -2,7 +2,6 @@ package com.baggio.esralgaworks.api.model.dto.input;
 
 import java.math.BigDecimal;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
@@ -26,9 +25,5 @@ public class ProdutoInputDTO {
 
 	@NotNull
 	private Boolean ativo;
-
-	@Valid
-	@NotNull
-	private RestauranteIdInputDTO restaurante;
-
+	
 }

@@ -14,6 +14,4 @@ public class ProdutoDTO {
 	private String descricao;
 	private BigDecimal preco;
 	private Boolean ativo;
-	private RestauranteDTO restaurante;
-
 }
